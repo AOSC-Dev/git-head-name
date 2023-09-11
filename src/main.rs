@@ -28,6 +28,7 @@ pub struct Repo {
 }
 
 fn main() {
+    env_logger::init();
     let path = PathBuf::from(".");
 
     match get_output(path) {
