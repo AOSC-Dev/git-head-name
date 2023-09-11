@@ -1,10 +1,12 @@
 use anyhow::{anyhow, Result};
+use console::style;
 use gix::state::InProgress;
 use gix::{
     sec::{self, trust::DefaultForLevel},
     Repository, ThreadSafeRepository,
 };
 use log::debug;
+use std::process::Command;
 use std::{path::PathBuf, process::exit};
 
 pub struct Repo {
@@ -29,20 +31,62 @@ pub struct Repo {
 
 fn main() {
     env_logger::init();
+
     let path = PathBuf::from(".");
 
-    match get_output(path) {
-        Ok(output) => println!("{output}"),
+    let s = match get_output(path) {
+        Ok(output) => output,
         Err(e) => {
             debug!("{e}");
             exit(1);
         }
     };
+
+    let cmd = Command::new("git")
+        .arg("status")
+        .arg("--porcelain")
+        .output()
+        .ok();
+
+    if let Some(cmd) = cmd {
+        if cmd.status.success() {
+            let out = String::from_utf8_lossy(&cmd.stdout);
+            let out = out
+                .trim()
+                .split('\n')
+                .map(|x| x.rsplit_once(" ").map(|x| x.0.trim()));
+
+            match out {
+                _ => {
+                    for i in out {
+                        match i {
+                            None => {
+                                println!("{}", style(s).green());
+                                break;
+                            }
+                            Some("M") => {
+                                println!("{}", style(&s).red());
+                                break;
+                            }
+                            Some("??") => {
+                                println!("{}", style(&s).magenta().bold());
+                                break;
+                            }
+                            _ => continue,
+                        }
+                    }
+                }
+            }
+        } else {
+            println!("{s}")
+        }
+    }
 }
 
 fn get_output(path: PathBuf) -> Result<String> {
     // custom open options
     let repo = get_repo(path)?;
+
     let git_repo = repo.repo.to_thread_local();
 
     let display_name = repo
@@ -112,6 +156,8 @@ fn get_repo(path: PathBuf) -> Result<Repo> {
     let branch = get_current_branch(&repository);
     // let remote = get_remote_repository_info(&repository, branch.as_deref());
     let path = repository.path().to_path_buf();
+
+    // let fs_monitor_value_is_true = repository;
 
     let repo = Repo {
         repo: shared_repo,
