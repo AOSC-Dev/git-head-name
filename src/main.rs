@@ -51,33 +51,28 @@ fn main() {
     if let Ok(cmd) = cmd {
         if cmd.status.success() {
             let out = String::from_utf8_lossy(&cmd.stdout);
-            let out = out
+            let mut out = out
                 .trim()
                 .split('\n')
-                .map(|x| x.rsplit_once(" ").map(|x| x.0.trim()));
+                .map(|x| x.rsplit_once(" "))
+                .flatten()
+                .map(|x| x.0.trim());
 
-            match out {
+            match out.next() {
+                None => {
+                    println!("{s}");
+                    status = 5;
+                }
+                Some("M") | Some("A") => {
+                    println!("{s}");
+                    status = 6;
+                }
+                Some("??") => {
+                    println!("{s}");
+                    status = 7;
+                }
                 _ => {
-                    for i in out {
-                        match i {
-                            None => {
-                                println!("{s}");
-                                status = 5;
-                                break;
-                            }
-                            Some("M") => {
-                                println!("{s}");
-                                status = 6;
-                                break;
-                            }
-                            Some("??") => {
-                                println!("{s}");
-                                status = 7;
-                                break;
-                            }
-                            _ => continue,
-                        }
-                    }
+                    println!("{s}");
                 }
             }
         } else {
