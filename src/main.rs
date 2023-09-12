@@ -28,6 +28,8 @@ pub struct Repo {
     // pub remote: Option<Remote>,
 }
 
+const MODIFY_STATUS: &[&str] = &["M", "A", "T", "D", "R", "C", "U"];
+
 fn main() {
     env_logger::init();
 
@@ -56,14 +58,17 @@ fn main() {
                 .split('\n')
                 .map(|x| x.rsplit_once(" "))
                 .flatten()
-                .map(|x| x.0.trim());
+                .map(|x| x.0);
 
             match out.next() {
                 None => {
                     println!("{s}");
                     status = 5;
                 }
-                Some("M") | Some("A") => {
+                Some(x)
+                    if MODIFY_STATUS.contains(&x)
+                        || MODIFY_STATUS.contains(&format!("{x} ").as_str()) =>
+                {
                     println!("{s}");
                     status = 6;
                 }
