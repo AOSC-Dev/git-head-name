@@ -28,7 +28,7 @@ pub struct Repo {
     // pub remote: Option<Remote>,
 }
 
-const MODIFY_STATUS: &[&str] = &["M", "A", "T", "D", "R", "C", "U"];
+const MODIFY_STATUS: &str = "MATDRCU";
 
 fn main() {
     env_logger::init();
