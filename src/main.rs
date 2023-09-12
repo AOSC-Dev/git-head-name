@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use console::style;
 use gix::state::InProgress;
 use gix::{
     sec::{self, trust::DefaultForLevel},
@@ -45,10 +44,11 @@ fn main() {
     let cmd = Command::new("git")
         .arg("status")
         .arg("--porcelain")
-        .output()
-        .ok();
+        .output();
 
-    if let Some(cmd) = cmd {
+    let mut status = 0;
+
+    if let Ok(cmd) = cmd {
         if cmd.status.success() {
             let out = String::from_utf8_lossy(&cmd.stdout);
             let out = out
@@ -61,15 +61,18 @@ fn main() {
                     for i in out {
                         match i {
                             None => {
-                                println!("{}", style(s).green());
+                                println!("{s}");
+                                status = 5;
                                 break;
                             }
                             Some("M") => {
-                                println!("{}", style(&s).red());
+                                println!("{s}");
+                                status = 6;
                                 break;
                             }
                             Some("??") => {
-                                println!("{}", style(&s).magenta().bold());
+                                println!("{s}");
+                                status = 7;
                                 break;
                             }
                             _ => continue,
@@ -78,9 +81,12 @@ fn main() {
                 }
             }
         } else {
-            println!("{s}")
+            println!("{s}");
+            status = 8;
         }
     }
+
+    exit(status)
 }
 
 fn get_output(path: PathBuf) -> Result<String> {
