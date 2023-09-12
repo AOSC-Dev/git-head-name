@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.0 (2023-09-12)
 
+<csr-id-0b51b53e1ad9bf68c1faf14ec9e0f309e5899a67/>
+<csr-id-ee6d445b20f429a179a957addd19bc3b7b10bfe4/>
+<csr-id-c2c76253aaf9fc607268c105500fa78c0a6a5a29/>
+
 ### Chore
 
  - <csr-id-0b51b53e1ad9bf68c1faf14ec9e0f309e5899a67/> Rename to bash-git-status
+
+### Documentation
+
+ - <csr-id-050bc151c56ed6520b4ef745526c50bc7de340ec/> Add changelog
 
 ### New Features
 
@@ -34,8 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 10 commits contributed to the release.
- - 8 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 11 commits contributed to the release.
+ - 9 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
 ### Commit Details
@@ -45,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Add changelog ([`050bc15`](https://github.com/AOSC-Dev/git-head-name/commit/050bc151c56ed6520b4ef745526c50bc7de340ec))
     - Run cargo clippy and cargo fmt to lint code ([`c2c7625`](https://github.com/AOSC-Dev/git-head-name/commit/c2c76253aaf9fc607268c105500fa78c0a6a5a29))
     - Rename to bash-git-status ([`0b51b53`](https://github.com/AOSC-Dev/git-head-name/commit/0b51b53e1ad9bf68c1faf14ec9e0f309e5899a67))
     - Fix MODIFY_STATUS match ([`d4a7c53`](https://github.com/AOSC-Dev/git-head-name/commit/d4a7c53bde9893d700ce12e9bd1b399f2f89bbdc))
