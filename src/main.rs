@@ -56,8 +56,7 @@ fn main() {
             let mut out = out
                 .trim()
                 .split('\n')
-                .map(|x| x.rsplit_once(" "))
-                .flatten()
+                .filter_map(|x| x.rsplit_once(' '))
                 .map(|x| x.0);
 
             match out.next() {
@@ -150,7 +149,7 @@ fn get_repo(path: PathBuf) -> Result<Repo> {
         ..gix::open::Permissions::default_for_level(sec::Trust::Full)
     });
     let shared_repo = match ThreadSafeRepository::discover_with_environment_overrides_opts(
-        &path,
+        path,
         Default::default(),
         git_open_opts_map,
     ) {
