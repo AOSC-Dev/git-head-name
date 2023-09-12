@@ -67,7 +67,8 @@ fn main() {
                 }
                 Some(x)
                     if MODIFY_STATUS.contains(&x)
-                        || MODIFY_STATUS.contains(&format!("{x} ").as_str()) =>
+                        || MODIFY_STATUS.contains(&&x[..1])
+                        || MODIFY_STATUS.contains(&&x[1..2]) =>
                 {
                     println!("{s}");
                     status = 6;
