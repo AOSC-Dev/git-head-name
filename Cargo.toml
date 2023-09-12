@@ -1,5 +1,5 @@
 [package]
-name = "git-head-name"
+name = "bash-git-status"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,4 +10,3 @@ gix = {version = "0.53", default-features = false, features = ["max-performance-
 anyhow = "1.0"
 env_logger = "0.10"
 log = "0.4"
-
