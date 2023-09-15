@@ -7,6 +7,16 @@ edition = "2021"
 
 [dependencies]
 gix = {version = "0.53", default-features = false, features = ["max-performance-safe", "revision"]}
+gix-features = { version = "0.34.0", optional = true }
 anyhow = "1.0"
 env_logger = "0.10"
 log = "0.4"
+
+[features]
+default = ["gix-max-perf"]
+# Enables most of the `max-performance` features of the `gix` module for better performance.
+# This can be more difficult to build in some conditions and requires cmake.
+gix-max-perf = ["gix-features/zlib-ng", "gix/fast-sha1"]
+# Slower than `git-repository-max-perf`, but better than the default.
+# Unlike `git-repository-max-perf` this does not require cmake and allows dynamic zlib linking.
+gix-faster = ["gix-features/zlib-stock", "gix/fast-sha1"]
