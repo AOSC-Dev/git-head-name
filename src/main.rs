@@ -167,7 +167,7 @@ fn get_repo(path: &Path) -> Result<Repo> {
         Default::default(),
         git_open_opts_map,
     )
-    .context(format!("Failed to find git repo"))?;
+    .context("Failed to find git repo")?;
 
     let repository = shared_repo.to_thread_local();
     let branch = get_current_branch(&repository);
