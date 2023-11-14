@@ -73,9 +73,9 @@ fn status(progress_status: &str) -> i32 {
                     status = 5;
                 }
                 Some(x)
-                    if MODIFY_STATUS.contains(&x)
-                        || MODIFY_STATUS.contains(&&x[..1])
-                        || MODIFY_STATUS.contains(&&x[1..2]) =>
+                    if MODIFY_STATUS.contains(x)
+                        || MODIFY_STATUS.contains(&x[..1])
+                        || MODIFY_STATUS.contains(&x[1..2]) =>
                 {
                     println!("{progress_status}");
                     status = 6;
