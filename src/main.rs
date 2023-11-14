@@ -1,11 +1,11 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use gix::commit::describe::SelectRef::{self};
 use gix::state::InProgress;
 use gix::{
     sec::{self, trust::DefaultForLevel},
     Repository, ThreadSafeRepository,
 };
-use log::debug;
+use log::{debug, error};
 use std::path::Path;
 use std::process::Command;
 use std::{path::PathBuf, process::exit};
@@ -40,17 +40,17 @@ fn main() {
     let progress_status = match repo_progress(path) {
         Ok(output) => output,
         Err(e) => {
-            debug!("{e}");
+            error!("{e}");
             exit(1);
         }
     };
 
-    let status = status(&progress_status);
+    let status = print_and_get_status(&progress_status);
 
     exit(status)
 }
 
-fn status(progress_status: &str) -> i32 {
+fn print_and_get_status(progress_status: &str) -> i32 {
     let cmd = Command::new("git")
         .arg("status")
         .arg("--porcelain")
@@ -61,13 +61,13 @@ fn status(progress_status: &str) -> i32 {
     if let Ok(cmd) = cmd {
         if cmd.status.success() {
             let out = String::from_utf8_lossy(&cmd.stdout);
-            let mut out = out
+            let mut out_iter = out
                 .trim()
                 .split('\n')
                 .filter_map(|x| x.rsplit_once(' '))
                 .map(|x| x.0);
 
-            match out.next() {
+            match out_iter.next() {
                 None => {
                     println!("{progress_status}");
                     status = 5;
@@ -88,11 +88,14 @@ fn status(progress_status: &str) -> i32 {
                     println!("{progress_status}");
                 }
             }
+
+            debug!("git status --porcelain output: {out}");
         } else {
             println!("{progress_status}");
             status = 8;
         }
     }
+
     status
 }
 
@@ -107,7 +110,7 @@ fn repo_progress(path: PathBuf) -> Result<String> {
         .or_else(|| get_tag(&git_repo))
         .or_else(|| Some(git_repo.head_id().ok()?.shorten_or_id().to_string()));
 
-    let display_name = display_name.ok_or_else(|| anyhow!("can not get branch/hash name"))?;
+    let display_name = display_name.ok_or_else(|| anyhow!("Failed to get branch/hash"))?;
 
     let s = if let Some(state) = repo.state {
         match state {
@@ -146,32 +149,29 @@ fn get_repo(path: &Path) -> Result<Repo> {
         env: true,
         includes: true,
     };
+
     git_open_opts_map.reduced = git_open_opts_map
         .reduced
         .permissions(gix::open::Permissions {
             config,
             ..gix::open::Permissions::default_for_level(sec::Trust::Reduced)
         });
+
     git_open_opts_map.full = git_open_opts_map.full.permissions(gix::open::Permissions {
         config,
         ..gix::open::Permissions::default_for_level(sec::Trust::Full)
     });
-    let shared_repo = match ThreadSafeRepository::discover_with_environment_overrides_opts(
+
+    let shared_repo = ThreadSafeRepository::discover_with_environment_overrides_opts(
         path,
         Default::default(),
         git_open_opts_map,
-    ) {
-        Ok(repo) => repo,
-        Err(e) => {
-            return Err(anyhow!("Failed to find git repo: {e}").context(e));
-        }
-    };
+    )
+    .context(format!("Failed to find git repo"))?;
+
     let repository = shared_repo.to_thread_local();
     let branch = get_current_branch(&repository);
-    // let remote = get_remote_repository_info(&repository, branch.as_deref());
     let path = repository.path().to_path_buf();
-
-    // let fs_monitor_value_is_true = repository;
 
     let repo = Repo {
         repo: shared_repo,
@@ -179,7 +179,6 @@ fn get_repo(path: &Path) -> Result<Repo> {
         workdir: repository.work_dir().map(PathBuf::from),
         path,
         state: repository.state(),
-        // remote,
     };
 
     Ok(repo)
@@ -198,7 +197,10 @@ fn get_tag(repository: &Repository) -> Option<String> {
         .describe()
         .names(SelectRef::AllTags)
         .id_as_fallback(false);
+
     let formatter = describe_platform.try_format().ok()??;
+
+    debug!("Describe: {:?}", formatter);
 
     if formatter.depth > 0 {
         None
