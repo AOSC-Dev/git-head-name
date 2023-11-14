@@ -1,10 +1,12 @@
 use anyhow::{anyhow, Result};
+use gix::commit::describe::SelectRef::{self};
 use gix::state::InProgress;
 use gix::{
     sec::{self, trust::DefaultForLevel},
     Repository, ThreadSafeRepository,
 };
 use log::debug;
+use std::path::Path;
 use std::process::Command;
 use std::{path::PathBuf, process::exit};
 
@@ -96,12 +98,13 @@ fn status(progress_status: &str) -> i32 {
 
 fn repo_progress(path: PathBuf) -> Result<String> {
     // custom open options
-    let repo = get_repo(path)?;
+    let repo = get_repo(&path)?;
 
     let git_repo = repo.repo.to_thread_local();
 
     let display_name = repo
         .branch
+        .or_else(|| get_tag(&git_repo))
         .or_else(|| Some(git_repo.head_id().ok()?.shorten_or_id().to_string()));
 
     let display_name = display_name.ok_or_else(|| anyhow!("can not get branch/hash name"))?;
@@ -132,7 +135,7 @@ fn repo_progress(path: PathBuf) -> Result<String> {
     Ok(s)
 }
 
-fn get_repo(path: PathBuf) -> Result<Repo> {
+fn get_repo(path: &Path) -> Result<Repo> {
     let mut git_open_opts_map = sec::trust::Mapping::<gix::open::Options>::default();
 
     let config = gix::open::permissions::Config {
@@ -187,4 +190,19 @@ fn get_current_branch(repository: &Repository) -> Option<String> {
     let shorthand = name.shorten();
 
     Some(shorthand.to_string())
+}
+
+fn get_tag(repository: &Repository) -> Option<String> {
+    let head_commit = repository.head_commit().ok()?;
+    let describe_platform = head_commit
+        .describe()
+        .names(SelectRef::AllTags)
+        .id_as_fallback(false);
+    let formatter = describe_platform.try_format().ok()??;
+
+    if formatter.depth > 0 {
+        None
+    } else {
+        Some(formatter.name?.to_string())
+    }
 }
