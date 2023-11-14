@@ -35,7 +35,7 @@ fn main() {
 
     let path = PathBuf::from(".");
 
-    let s = match get_output(path) {
+    let progress_status = match repo_progress(path) {
         Ok(output) => output,
         Err(e) => {
             debug!("{e}");
@@ -43,6 +43,12 @@ fn main() {
         }
     };
 
+    let status = status(&progress_status);
+
+    exit(status)
+}
+
+fn status(progress_status: &str) -> i32 {
     let cmd = Command::new("git")
         .arg("status")
         .arg("--porcelain")
@@ -61,7 +67,7 @@ fn main() {
 
             match out.next() {
                 None => {
-                    println!("{s}");
+                    println!("{progress_status}");
                     status = 5;
                 }
                 Some(x)
@@ -69,27 +75,26 @@ fn main() {
                         || MODIFY_STATUS.contains(&&x[..1])
                         || MODIFY_STATUS.contains(&&x[1..2]) =>
                 {
-                    println!("{s}");
+                    println!("{progress_status}");
                     status = 6;
                 }
                 Some("??") => {
-                    println!("{s}");
+                    println!("{progress_status}");
                     status = 7;
                 }
                 _ => {
-                    println!("{s}");
+                    println!("{progress_status}");
                 }
             }
         } else {
-            println!("{s}");
+            println!("{progress_status}");
             status = 8;
         }
     }
-
-    exit(status)
+    status
 }
 
-fn get_output(path: PathBuf) -> Result<String> {
+fn repo_progress(path: PathBuf) -> Result<String> {
     // custom open options
     let repo = get_repo(path)?;
 
@@ -97,7 +102,7 @@ fn get_output(path: PathBuf) -> Result<String> {
 
     let display_name = repo
         .branch
-        .or_else(|| Some(git_repo.head_id().ok()?.to_hex_with_len(7).to_string()));
+        .or_else(|| Some(git_repo.head_id().ok()?.shorten_or_id().to_string()));
 
     let display_name = display_name.ok_or_else(|| anyhow!("can not get branch/hash name"))?;
 
