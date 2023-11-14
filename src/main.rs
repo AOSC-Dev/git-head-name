@@ -5,7 +5,7 @@ use gix::{
     sec::{self, trust::DefaultForLevel},
     Repository, ThreadSafeRepository,
 };
-use log::{debug, error};
+use log::debug;
 use std::path::Path;
 use std::process::Command;
 use std::{path::PathBuf, process::exit};
@@ -40,7 +40,7 @@ fn main() {
     let progress_status = match repo_progress(path) {
         Ok(output) => output,
         Err(e) => {
-            error!("{e}");
+            debug!("{e}");
             exit(1);
         }
     };
@@ -105,10 +105,12 @@ fn repo_progress(path: PathBuf) -> Result<String> {
 
     let git_repo = repo.repo.to_thread_local();
 
-    let display_name = repo
-        .branch
-        .or_else(|| get_tag(&git_repo))
-        .or_else(|| Some(git_repo.head_id().ok()?.shorten_or_id().to_string()));
+    let display_name = repo.branch.or_else(|| get_tag(&git_repo)).or_else(|| {
+        Some(format!(
+            "(detached {})",
+            git_repo.head_id().ok()?.shorten_or_id()
+        ))
+    });
 
     let display_name = display_name.ok_or_else(|| anyhow!("Failed to get branch/hash"))?;
 
