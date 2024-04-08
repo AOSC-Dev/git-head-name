@@ -6,6 +6,7 @@ use gix::{
     Repository, ThreadSafeRepository,
 };
 use log::debug;
+use std::env;
 use std::path::Path;
 use std::process::Command;
 use std::{path::PathBuf, process::exit};
@@ -51,6 +52,12 @@ fn main() {
 }
 
 fn print_and_get_status(progress_status: &str) -> i32 {
+    println!("{progress_status}");
+
+    if env::var("BASH_DISABLE_GIT_FILE_TRACKING").is_ok() {
+        return 9;
+    }
+
     let cmd = Command::new("git")
         .arg("status")
         .arg("--porcelain")
@@ -89,8 +96,6 @@ fn print_and_get_status(progress_status: &str) -> i32 {
             status = 8;
         }
     }
-
-    println!("{progress_status}");
 
     status
 }
