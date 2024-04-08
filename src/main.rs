@@ -69,7 +69,6 @@ fn print_and_get_status(progress_status: &str) -> i32 {
 
             match out_iter.next() {
                 None => {
-                    println!("{progress_status}");
                     status = 5;
                 }
                 Some(x)
@@ -77,24 +76,21 @@ fn print_and_get_status(progress_status: &str) -> i32 {
                         || MODIFY_STATUS.contains(&x[..1])
                         || MODIFY_STATUS.contains(&x[1..2]) =>
                 {
-                    println!("{progress_status}");
                     status = 6;
                 }
                 Some("??") => {
-                    println!("{progress_status}");
                     status = 7;
                 }
-                _ => {
-                    println!("{progress_status}");
-                }
+                _ => {}
             }
 
             debug!("git status --porcelain output: {out}");
         } else {
-            println!("{progress_status}");
             status = 8;
         }
     }
+
+    println!("{progress_status}");
 
     status
 }

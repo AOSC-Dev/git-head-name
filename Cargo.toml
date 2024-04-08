@@ -6,14 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gix = {version = "0.58", default-features = false, features = ["max-performance-safe", "revision"]}
+gix = {version = "0.61", default-features = false, features = ["max-performance-safe", "revision"]}
 gix-features = { version = "0.38.0", optional = true }
 anyhow = "1.0"
 env_logger = "0.11"
 log = "0.4"
-# FIXME: 0.38.30 failed to build on loongarch64
-# See: https://github.com/rust-lang/libc/pull/3551
-rustix = { version = "=0.38.28", features = ["process"] }
+rustix = { version = "0.38", features = ["process"] }
 
 [features]
 default = ["gix-max-perf"]
