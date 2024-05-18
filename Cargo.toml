@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gix = {version = "0.61", default-features = false, features = ["max-performance-safe", "revision"]}
+gix = {version = "0.62", default-features = false, features = ["max-performance-safe", "revision"]}
 gix-features = { version = "0.38.0", optional = true }
 anyhow = "1.0"
 env_logger = "0.11"
