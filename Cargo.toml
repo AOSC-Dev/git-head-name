@@ -6,8 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gix = {version = "0.62", default-features = false, features = ["max-performance-safe", "revision"]}
-gix-features = { version = "0.38.0", optional = true }
+gix = { git = "https://github.com/GitoxideLabs/gitoxide", rev = "8d84818240d44e1f5fe78a231b5d9bffd0283918", package = "gix", default-features = false, features = [
+    "max-performance-safe",
+    "revision",
+    "status",
+] }
+gix-features = { version = "0.39.0", optional = true }
 anyhow = "1.0"
 env_logger = "0.11"
 log = "0.4"
@@ -21,3 +25,8 @@ gix-max-perf = ["gix-features/zlib-ng", "gix/fast-sha1"]
 # Slower than `git-repository-max-perf`, but better than the default.
 # Unlike `git-repository-max-perf` this does not require cmake and allows dynamic zlib linking.
 gix-faster = ["gix-features/zlib-stock", "gix/fast-sha1"]
+
+[profile.release]
+lto = "thin"
+opt-level = 3
+codegen-units = 1
